@@ -1,0 +1,131 @@
+.voice-masker
+    $micro-width = 90px
+    $micro-border = 1px
+
+    fixed: 0 0 0 0
+    display: block
+    overflow: hidden
+    user-select: none
+    z-index: 1024
+
+    > .wrapper
+        background: #fff
+        absolute: 0 0 0 0
+        opacity: 1
+
+    .voice-speak-btn
+        background-color: #306eff
+        border-radius: 50%
+        bottom: 10px
+        color: #fff
+        display: block
+        size: $micro-width
+        line-height: $micro-width
+        margin-left: -40px
+        absolute: _ _ _ 50%
+        text-align: center
+        text-decoration: none
+        user-select: none
+        cursor: pointer
+        font-size: 16px
+        -webkit-touch-callout: none
+        -webkit-tap-highlight-color: transparent;
+
+        .voice-speak-wave
+            absolute: -1px _ _ -1px
+            border: solid #306eff 1px
+            size: $micro-width - ($micro-border * 2)
+            border-radius: 50%
+            opacity: .15
+            display: none
+
+            &.level0
+                animation: spread0 3s linear 0s infinite
+
+            &.level1
+                animation: spread1 3s linear 0s infinite
+
+            &.level2
+                animation: spread2 3s linear 0s infinite
+
+            &.level3
+                animation: spread3 3s linear 0s infinite
+
+        .voice-speak-circle
+            absolute: -1px _ _ -1px
+            size: $micro-width - ($micro-border * 2)
+            border-radius: 50%
+            opacity: .3
+            display: none
+            background-color: #306eff
+            border: solid #306eff 1px
+            animation: stretch 1s linear 0s alternate infinite
+
+        &.press
+            .voice-speak-wave,
+            .voice-speak-circle
+                display: block
+
+    .voice-text
+        color: 111
+        font-size: 20px
+        margin-top: 150px
+        padding: 0 10%
+        text-align: center
+        user-select: none
+
+    .voice-close-btn
+        absolute: 0 0 _ _
+        size: 40px
+        font-size: 24px
+        line-height: 40px
+        text-align: center
+        color: #ddd
+        -webkit-tap-highlight-color: transparent;
+
+@keyframes stretch
+    0%, 100%
+        transform: scale(1)
+    25%, 60%
+        transform: scale(1.5)
+
+    50%, 80%
+        transform: scale(1.3)
+
+    10%, 75%
+        transform: scale(1.1)
+
+
+
+
+@keyframes spread0
+    0%
+        opacity: .15
+
+    100%
+        opacity: 0
+        transform: scale(2)
+
+@keyframes spread1
+    0%
+        opacity: .15
+
+    100%
+        opacity: 0
+        transform: scale(4)
+
+@keyframes spread2
+    0%
+        opacity: .15
+
+    100%
+        opacity: 0
+        transform: scale(8)
+
+@keyframes spread3
+    0%
+        opacity: .15
+
+    100%
+        opacity: 0
+        transform: scale(14)

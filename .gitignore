@@ -1,0 +1,9 @@
+dep
+node_modules
+npm-debug.log
+Thumbs.db
+.DS_Store
+._*
+*.swp
+.vscode
+nohup.out
