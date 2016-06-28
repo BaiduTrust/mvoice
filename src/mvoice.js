@@ -20,7 +20,15 @@ define(function (require) {
      * @const
      * @type {string}
      */
-    var URL_GET_WX_PARAM = '/mock/getweixinconfigajax.php';
+    var URL_GET_WX_PARAM = '/mock/weixin/getweixinconfigajax.php';
+
+    /**
+     * 获取百度语音参数的url
+     *
+     * @const
+     * @type {string}
+     */
+    var URL_GET_BAIDU_VOICE_PARAM = '/mock/baiduvoice/getbaiduvoiceconfigajax.php';
 
     var exports = {};
 
@@ -87,6 +95,22 @@ define(function (require) {
                     url: encodeURIComponent(window.location.href)
                 }
             )
+            .then(function (data) {
+                if (typeof callback === 'function') {
+                    callback(data);
+                }
+            });
+    }
+
+    /**
+     * 获取百度语音参数，用于调取百度语音转文字接口
+     *
+     * @inner
+     * @param {Function} callback 回调函数
+     */
+    function getBaiduVoiceConfig(callback) {
+        ajax
+            .get(URL_GET_BAIDU_VOICE_PARAM)
             .then(function (data) {
                 if (typeof callback === 'function') {
                     callback(data);
@@ -292,14 +316,18 @@ define(function (require) {
                             recorder && recorder.stop();
                             recorder && recorder.exportWAV(function(blob) {
 
-                                // 语音文件传送到百度语音
-                                var xhr = new XMLHttpRequest();
-                                xhr.open('POST', 'http://vop.baidu.com/server_api?lan=zh&cuid=***&token=***', true);
-                                xhr.setRequestHeader('content-type', 'audio/wav');
-                                xhr.onload = function(e) {
-                                    // Handle the response.
-                                }
-                                xhr.send(blob);
+
+                                getBaiduVoiceConfig(function (data) {
+                                    var xhr = new XMLHttpRequest();
+                                    xhr.open('POST', 'http://vop.baidu.com/server_api?lan=zh&cuid=dsfasdlfjaldsjfafsd&token=' + data, true);
+                                    xhr.setRequestHeader('content-type', 'audio/wav');
+                                    xhr.onload = function(e) {
+                                        console.log(e);
+                                        // Handle the response.
+                                    }
+                                    xhr.send(blob);
+                                })
+
 
 
                             console.log(blob);
