@@ -11,6 +11,7 @@ define(function (require) {
     var env = require('saber-env');
     var ajax = require('saber-ajax').ejson;
     var Tap = require('saber-tap');
+    var Recorder = require('Recorder');
     var VoiceDialog = require('./VoiceDialog');
 
     /**
@@ -26,16 +27,15 @@ define(function (require) {
     // 微信语音本地id
     var voiceLocalId;
 
-    var userMedia;
-
     window.URL = window.URL
         || window.webkitURL
-        || window.msURL
-        || window.oURL;
+        || window.mozURL
+        || window.msURL;
 
     window.AudioContext = window.AudioContext
         || window.webkitAudioContext
-        || window.mozAudioContext;
+        || window.mozAudioContext
+        || window.msAudioContext;
 
     navigator.getUserMedia = navigator.getUserMedia
         || navigator.webkitGetUserMedia
@@ -98,8 +98,6 @@ define(function (require) {
         opts = opts || {};
 
         function startRecordHandler(self) {
-            dom.addClass(self.speakBtn, 'press');
-
             // TODO 需要判断当前是否是录音状态
             // 如果是的话直接停止上一次录音状态，开始新的录音
 
@@ -111,8 +109,6 @@ define(function (require) {
         }
 
         function stopRecordHandler(self) {
-            dom.removeClass(self.speakBtn, 'press');
-
             wx.stopRecord({
                 success: function (res) {
                     voiceLocalId = res.localId;
@@ -147,7 +143,7 @@ define(function (require) {
         });
     }
 
-    function isSupportWebRTC() {
+    function isSupportAudio() {
         if (navigator.getUserMedia && window.URL && window.AudioContext && window.Worker) {
             return true;
         }
@@ -171,7 +167,7 @@ define(function (require) {
             return true;
         }
         // 监测是否支持WebRTC
-        if (isSupportWebRTC()) {
+        if (isSupportAudio()) {
             return true;
         }
 
@@ -216,15 +212,27 @@ define(function (require) {
         });
     }
 
-    function initWebRTC() {
+    function initAudio() {
+
+    }
+
+    function checkAudio(onsuccess) {
+        if (userMedia) {
+            onsuccess();
+            return;
+        }
+
         navigator.getUserMedia(
             {audio: true},
             function (s) {
-                console.log(1);
                 userMedia = s;
+                if (typeof onsuccess === 'function') {
+                    onsuccess();
+                }
             },
             function (e) {
-                alert(e);
+                // 不支持https的网站，将无法使用语音功能
+                alert('发送了一些错误');
             }
         );
     }
@@ -262,20 +270,82 @@ define(function (require) {
                     initWxVoice(voiceDialog, {
                         oncomplete: opts.oncomplete
                     });
+
+                    isInited = true;
+                    return;
                 }
 
                 // 初始化原生
-                if (isSupportWebRTC()) {
-                    initWebRTC(voiceDialog, {
-                        oncomplete: opts.oncomplete
-                    });
-                }
+                if (isSupportAudio()) {
+                    // checkAudio(function () {
+                    //     initAudio();
+                    // });
+                    navigator.getUserMedia({audio: true}, function (stream) {
+                        var audioContext = new AudioContext;
+                        var input = audioContext.createMediaStreamSource(stream);
+                        var recorder = new Recorder(input);
 
-                isInited = true;
+                        voiceDialog.on('show', function () {
+                            recorder && recorder.record();
+                        });
+                        voiceDialog.on('complete', function () {
+                            recorder && recorder.stop();
+                            recorder && recorder.exportWAV(function(blob) {
+
+                                // 语音文件传送到百度语音
+                                var xhr = new XMLHttpRequest();
+                                xhr.open('POST', 'http://vop.baidu.com/server_api?lan=zh&cuid=***&token=***', true);
+                                xhr.setRequestHeader('content-type', 'audio/wav');
+                                xhr.onload = function(e) {
+                                    // Handle the response.
+                                }
+                                xhr.send(blob);
+
+
+                            console.log(blob);
+                              var url = URL.createObjectURL(blob);
+                              var li = document.createElement('li');
+                              var au = document.createElement('audio');
+                              var hf = document.createElement('a');
+
+                              au.controls = true;
+                              au.src = url;
+                              hf.href = url;
+                              hf.download = new Date().toISOString() + '.wav';
+                              hf.innerHTML = hf.download;
+                              li.appendChild(au);
+                              li.appendChild(hf);
+                              dom.query('.voice-text').appendChild(li);
+                            });
+                            recorder && recorder.clear();
+                        });
+                        voiceDialog.on('close', function () {
+                            recorder.stop();
+                            recorder.clear();
+                        });
+                        voiceDialog.show();
+                    }, function(e) {
+                        alert('发送了一些错误');
+                    });
+
+
+
+                    isInited = true;
+                    return;
+                }
+            }
+
+            if (isWechat()) {
+                voiceDialog.show();
                 return;
             }
 
-            voiceDialog.show();
+            // if (isSupportAudio()) {
+            //     checkAudio(function () {
+            //         voiceDialog.show();
+            //     });
+            //     return;
+            // }
         });
     };
 

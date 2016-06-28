@@ -1,0 +1,17 @@
+{
+    "demo/basic.html": "ce69e524468a1bdbf52cb546fb635517",
+    "doc/connection.md": "97c9fc7f21ad1ce58fa96c64a1adaa9a",
+    "doc/media.md": "4bbbf75ad1dfe2e7cda44da19533caf7",
+    "History.md": "5d787e1908ba6993fcae1620d8182c64",
+    "package.json": "2fc4294db1833e492c193cd2f98333aa",
+    "README.md": "61ee8d7806b0faab69a653a5b5e353f3",
+    "src/connection.js": "04fcf1732251523202303bf8a4c4f605",
+    "src/detect.js": "2f20ba666e75309f5da3d20cb6f59abc",
+    "src/main.js": "d6ec1d0d90160adb2a6688c70abdb100",
+    "src/media.js": "8a7d5e8e5fdb2f4ffbc4fbd374e1f03c",
+    "test/connection.spec.js": "5d65b483f57992864869e1f85d182acf",
+    "test/detect.spec.js": "f9a417d9c2e6b938757a18246ca96782",
+    "test/media.spec.js": "73a4034f646cfcebf4b534d7eb1d3c7e",
+    "test/run-jasmine.js": "7c0d964113df9f083f21291056e23f0a",
+    "test/runner.html": "a0fb70d4cf596b6120a3e975777e53a5"
+}

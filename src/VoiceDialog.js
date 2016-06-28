@@ -92,6 +92,7 @@ define(function (require) {
             // 点击关闭按钮
             // 因为存在点击穿透的问题，所以我们这里使用click
             self.closeBtn.addEventListener('touchend', function () {
+                dom.removeClass(self.speakBtn, 'press');
                 self.emit('close', self);
                 setTimeout(function () {
                     self.hide();
@@ -101,6 +102,7 @@ define(function (require) {
 
             // 点击说话按钮
             self.speakBtn.addEventListener('touchstart', function () {
+                dom.removeClass(self.speakBtn, 'press');
                 self.emit('complete', self);
             });
         },
@@ -128,10 +130,12 @@ define(function (require) {
 
             switch (status) {
                 case 'speaking':
+                    dom.addClass(self.speakBtn, 'press');
                     self._setVoiceText(SPEAKING_TXT);
                     break;
 
                 case 'complete':
+                    dom.removeClass(self.speakBtn, 'press');
                     self._setVoiceText(speakWord);
                     setTimeout(
                         function () {

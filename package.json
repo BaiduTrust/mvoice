@@ -5,30 +5,9 @@
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1"
     },
-    "edp": {
-        "wwwroot": "/",
-        "depDir": "dep",
-        "srcDir": "src",
-        "loaderAutoConfig": "js,htm,html,tpl,vm,phtml",
-        "loaderUrl": "http://s1.bdstatic.com/r/www/cache/ecom/esl/1-8-0/esl.js",
-        "dependencies": {
-            "edp-provider-rider": "~0.3.4",
-            "rider-ui": "~0.1.1",
-            "etpl": "~3.0.0",
-            "saber-dom": "~1.0.0",
-            "saber-ajax": "~2.0.0-beta.2",
-            "saber-emitter": "~2.0.0",
-            "saber-lang": "~2.0.1",
-            "saber-promise": "~2.0.0",
-            "saber-tap": "~1.0.0",
-            "saber-env": "~1.0.0"
-        }
-    },
     "dependencies": {
         "edp-provider-rider": "~0.3.4",
-        "rider-ui": "~0.1.1",
-        "etpl": "~3.0.0",
-        "saber-dom": "~1.0.0"
+        "rider-ui": "~0.1.1"
     },
     "author": "cgzero@cgzero.com",
     "license": "ISC"
