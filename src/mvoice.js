@@ -30,6 +30,14 @@ define(function (require) {
      */
     var URL_GET_BAIDU_VOICE_PARAM = '/mock/baiduvoice/getbaiduvoiceconfigajax.php';
 
+    /**
+     * 百度语音转文字url
+     *
+     * @const
+     * @type {string}
+     */
+    var URL_UPLOAD = '/mock/baiduvoice/upload.php';
+
     var exports = {};
 
     // 微信语音本地id
@@ -138,12 +146,21 @@ define(function (require) {
                     voiceLocalId = res.localId;
 
                     wx.translateVoice({
-                        localId: voiceLocalId, // 需要识别的音频的本地Id，由录音相关接口获得
-                        isShowProgressTips: 1, // 默认为1，显示进度提示
+                        // 需要识别的音频的本地Id，由录音相关接口获得
+                        localId: voiceLocalId,
+                        // 默认为1，显示进度提示
+                        isShowProgressTips: 1,
                         success: function (res) {
 
-                            // TODO 需要转义
+                            // 如果识别的内容为空，则直接关闭
+                            if (!res.translateResult) {
+                                voiceDialog.setVoiceStatus('complete', '暂未识别');
+                                return;
+                            }
+
+                            // 识别成功
                             voiceDialog.setVoiceStatus('complete', res.translateResult, function (result) {
+                                // 执行成功后回调
                                 if (typeof opts.onsuccess === 'function') {
                                     opts.onsuccess(result);
                                 }
@@ -167,6 +184,12 @@ define(function (require) {
         });
     }
 
+    /**
+     * 是否支持原生语音
+     *
+     * @inner
+     * @return {boolean} 是否支持原生语音
+     */
     function isSupportAudio() {
         if (navigator.getUserMedia && window.URL && window.AudioContext && window.Worker) {
             return true;
@@ -175,6 +198,12 @@ define(function (require) {
         return false;
     }
 
+    /**
+     * 是否是微信
+     *
+     * @inner
+     * @return {boolean} 是否是微信
+     */
     function isWechat() {
         return env.browser.wechat;
     }
@@ -256,7 +285,7 @@ define(function (require) {
             },
             function (e) {
                 // 不支持https的网站，将无法使用语音功能
-                alert('发送了一些错误');
+                alert('发生了一些错误');
             }
         );
     }
@@ -319,7 +348,7 @@ define(function (require) {
 
                                 getBaiduVoiceConfig(function (data) {
                                     var xhr = new XMLHttpRequest();
-                                    xhr.open('POST', 'http://vop.baidu.com/server_api?lan=zh&cuid=dsfasdlfjaldsjfafsd&token=' + data, true);
+                                    xhr.open('POST', URL_UPLOAD + '?token=' + data, true);
                                     xhr.setRequestHeader('content-type', 'audio/wav');
                                     xhr.onload = function(e) {
                                         console.log(e);
