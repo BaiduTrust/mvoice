@@ -20,7 +20,7 @@ define(function (require) {
      * @const
      * @type {string}
      */
-    var URL_GET_WX_PARAM = '/mock/weixin/getweixinconfigajax.php';
+    var URL_GET_WX_PARAM = '/mock/getweixinconfigajax.php';
 
     var exports = {};
 
@@ -241,8 +241,6 @@ define(function (require) {
             function (recorder) {
 
                 recorder.on('result', function (result) {
-                    console.log('result');
-                    console.log(result);
                     var resultTxt = result.content.item.join(', ');
 
                     // 最后一个reuslt的idx为-1，用这个结果去判断

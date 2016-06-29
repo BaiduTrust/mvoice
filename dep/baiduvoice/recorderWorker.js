@@ -32,14 +32,14 @@ La.prototype.g=function(){var f,e,c,a,b,g,l,m,d=new (C?Uint8Array:Array)(32768),
 0;for(m=k.length;l<m;++l)g=k.charCodeAt(l),255<g&&(d[h++]=g>>>8&255),d[h++]=g&255;d[h++]=0}this.d.fhcrc&&(c=ka(d,0,h)&65535,d[h++]=c&255,d[h++]=c>>>8&255);this.e.outputBuffer=d;this.e.outputIndex=h;b=new ma(s,this.e);d=b.g();h=b.c;C&&(h+8>d.buffer.byteLength?(this.a=new Uint8Array(h+8),this.a.set(new Uint8Array(d.buffer)),d=this.a):d=new Uint8Array(d.buffer));a=ka(s,p,p);d[h++]=a&255;d[h++]=a>>>8&255;d[h++]=a>>>16&255;d[h++]=a>>>24&255;m=s.length;d[h++]=m&255;d[h++]=m>>>8&255;d[h++]=m>>>16&255;d[h++]=
 m>>>24&255;this.i=x;C&&h<d.length&&(this.a=d=d.subarray(0,h));return d};var Pa=255,Oa=2,Ma=8,Na=16;fa("Zlib.Gzip",La);fa("Zlib.Gzip.prototype.compress",La.prototype.g);}).call(this);
 ///生成uuid
-var createUUID = (function (uuidRegEx, uuidReplacer) { 
-    return function () { 
-        return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(uuidRegEx, uuidReplacer).toUpperCase(); 
-    }; 
-})(/[xy]/g, function (c) { 
-    var r = Math.random() * 16 | 0, 
-    v = c == "x" ? r : (r & 3 | 8); 
-    return v.toString(16); 
+var createUUID = (function (uuidRegEx, uuidReplacer) {
+    return function () {
+        return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(uuidRegEx, uuidReplacer).toUpperCase();
+    };
+})(/[xy]/g, function (c) {
+    var r = Math.random() * 16 | 0,
+    v = c == "x" ? r : (r & 3 | 8);
+    return v.toString(16);
 });
 
 function str2uint8(str){
@@ -147,7 +147,7 @@ function getSendBuffer(isLast){
     //var boundary="-BD**VR+NOgzip";
     var boundary="-BD**VR+gzgzip";
     var CRLF="\r\n";
-    
+
     var jsonObj={
         //平台
         "pfm" : "iOS&1&1&1&1",
@@ -185,7 +185,7 @@ function getSendBuffer(isLast){
     }
     recBuffersL.slice(sendOffset);
     var audiodata=mergeBuffers(recBuffersL.slice(sendOffset));
-    console.log("send "+sendOffset+" to "+(recBuffersL.length-1));
+    // console.log("send "+sendOffset+" to "+(recBuffersL.length-1));
     sendOffset=recBuffersL.length;
     //每个boundary前面加了“--”，语音方面定义的非标准协议
     var cus_boundary="--"+boundary;
@@ -200,7 +200,7 @@ function getSendBuffer(isLast){
     pos+=4;
     pos=writePcm(view, pos, audiodata),
     pos=writeString(view, pos, CRLF+cus_boundary+"--"+CRLF);
-    
+
     return {buffer:buffer,boundary:boundary,json:jsonObj};
 
 }
