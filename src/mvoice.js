@@ -90,6 +90,22 @@ define(function (require) {
     function initWXVoiceEvent(voiceDialog, opts) {
         opts = opts || {};
 
+        function translateHandler(translateResult) {
+            // 如果识别的内容为空，则直接关闭
+            if (!translateResult) {
+                voiceDialog.setVoiceStatus('complete', '暂未识别');
+                return;
+            }
+
+            // 识别成功
+            voiceDialog.setVoiceStatus('complete', translateResult, function (result) {
+                // 执行成功后回调
+                if (typeof opts.onsuccess === 'function') {
+                    opts.onsuccess(result);
+                }
+            });
+        }
+
         function startRecordHandler(self) {
             // TODO 需要判断当前是否是录音状态
             // 如果是的话直接停止上一次录音状态，开始新的录音
@@ -112,20 +128,7 @@ define(function (require) {
                         // 默认为1，显示进度提示
                         isShowProgressTips: 1,
                         success: function (res) {
-
-                            // 如果识别的内容为空，则直接关闭
-                            if (!res.translateResult) {
-                                voiceDialog.setVoiceStatus('complete', '暂未识别');
-                                return;
-                            }
-
-                            // 识别成功
-                            voiceDialog.setVoiceStatus('complete', res.translateResult, function (result) {
-                                // 执行成功后回调
-                                if (typeof opts.onsuccess === 'function') {
-                                    opts.onsuccess(result);
-                                }
-                            });
+                            translateHandler(res.translateResult);
                         }
                     });
                 }
@@ -140,7 +143,8 @@ define(function (require) {
         wx.onVoiceRecordEnd({
             complete: function (res) {
                 voiceLocalId = res.localId;
-                alert('录音时间已超过一分钟');
+                // alert('录音时间已超过一分钟');
+                translateHandler(res.translateResult);
             }
         });
     }
