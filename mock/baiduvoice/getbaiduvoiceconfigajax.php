@@ -3,7 +3,7 @@ require_once "voice.php";
 // 陈功
 $voice = new VOICE("mFwFjUT2ze73v0mTnp0fvsjh", "82efa56176fe206a84cfc07024246577");
 
-$accessToken = $voice->GetAccessToken($url);
+$accessToken = $voice->GetAccessToken();
 
 $jsonResponse = array(
   "status" => 0,

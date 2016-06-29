@@ -11,7 +11,7 @@ define(function (require) {
     var env = require('saber-env');
     var ajax = require('saber-ajax').ejson;
     var Tap = require('saber-tap');
-    var Recorder = require('Recorder');
+    var baiduvoice = require('baiduvoice');
     var VoiceDialog = require('./VoiceDialog');
 
     /**
@@ -22,41 +22,10 @@ define(function (require) {
      */
     var URL_GET_WX_PARAM = '/mock/weixin/getweixinconfigajax.php';
 
-    /**
-     * 获取百度语音参数的url
-     *
-     * @const
-     * @type {string}
-     */
-    var URL_GET_BAIDU_VOICE_PARAM = '/mock/baiduvoice/getbaiduvoiceconfigajax.php';
-
-    /**
-     * 百度语音转文字url
-     *
-     * @const
-     * @type {string}
-     */
-    var URL_UPLOAD = '/mock/baiduvoice/upload.php';
-
     var exports = {};
 
     // 微信语音本地id
     var voiceLocalId;
-
-    window.URL = window.URL
-        || window.webkitURL
-        || window.mozURL
-        || window.msURL;
-
-    window.AudioContext = window.AudioContext
-        || window.webkitAudioContext
-        || window.mozAudioContext
-        || window.msAudioContext;
-
-    navigator.getUserMedia = navigator.getUserMedia
-        || navigator.webkitGetUserMedia
-        || navigator.mozGetUserMedia
-        || navigator.msGetUserMedia;
 
     /**
      * 微信 api 配置
@@ -111,21 +80,13 @@ define(function (require) {
     }
 
     /**
-     * 获取百度语音参数，用于调取百度语音转文字接口
+     * 初始化微信
      *
      * @inner
-     * @param {Function} callback 回调函数
+     * @param {Object} voiceDialog 语音组件
+     * @param {Object} opts 参数对象
+     * @param {Function} opts.onsuccess 成功后回调
      */
-    function getBaiduVoiceConfig(callback) {
-        ajax
-            .get(URL_GET_BAIDU_VOICE_PARAM)
-            .then(function (data) {
-                if (typeof callback === 'function') {
-                    callback(data);
-                }
-            });
-    }
-
     function initWXVoiceEvent(voiceDialog, opts) {
         opts = opts || {};
 
@@ -191,7 +152,7 @@ define(function (require) {
      * @return {boolean} 是否支持原生语音
      */
     function isSupportAudio() {
-        if (navigator.getUserMedia && window.URL && window.AudioContext && window.Worker) {
+        if (baiduvoice.support()) {
             return true;
         }
 
@@ -265,27 +226,67 @@ define(function (require) {
         });
     }
 
-    function initAudio() {
+    /**
+     * 初始化百度语音
+     *
+     * @public
+     * @param {Object} voiceDialog 语音浮层实例
+     * @param {Object} opts 参数
+     * @param {string} opts.oncomplete 识别完成后回调函数
+     */
+    function initBaiduVoice(voiceDialog, opts) {
+        opts = opts || {};
 
-    }
+        baiduvoice.init().then(
+            function (recorder) {
 
-    function checkAudio(onsuccess) {
-        if (userMedia) {
-            onsuccess();
-            return;
-        }
+                recorder.on('result', function (result) {
+                    console.log('result');
+                    console.log(result);
+                    var resultTxt = result.content.item.join(', ');
 
-        navigator.getUserMedia(
-            {audio: true},
-            function (s) {
-                userMedia = s;
-                if (typeof onsuccess === 'function') {
-                    onsuccess();
-                }
+                    // 最后一个reuslt的idx为-1，用这个结果去判断
+                    if (result.result.idx === -1) {
+                        voiceDialog.setVoiceStatus(
+                            'complete',
+                            resultTxt,
+                            function (txt) {
+                                if (typeof opts.oncomplete === 'function') {
+                                    opts.oncomplete(txt);
+                                }
+                            }
+                        );
+                    }
+                    // 正在说话中，不断返回识别的结果
+                    else {
+                        voiceDialog.setVoiceStatus('result', resultTxt);
+                    }
+                });
+
+                recorder.on('finish', function (result) {
+                    voiceDialog.setVoiceStatus('finish');
+                });
+
+                // 先解绑
+                voiceDialog.off('show');
+                voiceDialog.off('complete');
+                voiceDialog.off('close');
+
+                voiceDialog.on('show', function () {
+                    recorder.start();
+                });
+                voiceDialog.on('complete', function () {
+                    recorder.stop();
+                });
+                voiceDialog.on('close', function () {
+                    recorder.stop();
+                });
+
+                voiceDialog.show();
+
             },
-            function (e) {
-                // 不支持https的网站，将无法使用语音功能
-                alert('发生了一些错误');
+            function () {
+                alert('无法获取麦克风~');
             }
         );
     }
@@ -315,99 +316,41 @@ define(function (require) {
                 return;
             }
 
-            if (!isInited) {
-                voiceDialog = new VoiceDialog();
-
-                // 初始化微信
-                if (isWechat()) {
+            // 处理微信
+            if (isWechat()) {
+                if (!isInited) {
+                    voiceDialog = new VoiceDialog();
                     initWxVoice(voiceDialog, {
                         oncomplete: opts.oncomplete
                     });
 
                     isInited = true;
-                    return;
+                }
+                else {
+                    voiceDialog.show();
                 }
 
-                // 初始化原生
-                if (isSupportAudio()) {
-                    // checkAudio(function () {
-                    //     initAudio();
-                    // });
-                    navigator.getUserMedia({audio: true}, function (stream) {
-                        var audioContext = new AudioContext;
-                        var input = audioContext.createMediaStreamSource(stream);
-                        var recorder = new Recorder(input);
+                return {
+                    dispose: voiceDialog.dispose
+                };
+            }
 
-                        voiceDialog.on('show', function () {
-                            recorder && recorder.record();
-                        });
-                        voiceDialog.on('complete', function () {
-                            recorder && recorder.stop();
-                            recorder && recorder.exportWAV(function(blob) {
-
-
-                                getBaiduVoiceConfig(function (data) {
-                                    var xhr = new XMLHttpRequest();
-                                    xhr.open('POST', URL_UPLOAD + '?token=' + data, true);
-                                    xhr.setRequestHeader('content-type', 'audio/wav');
-                                    xhr.onload = function(e) {
-                                        console.log(e);
-                                        // Handle the response.
-                                    }
-                                    xhr.send(blob);
-                                })
-
-
-
-                            console.log(blob);
-                              var url = URL.createObjectURL(blob);
-                              var li = document.createElement('li');
-                              var au = document.createElement('audio');
-                              var hf = document.createElement('a');
-
-                              au.controls = true;
-                              au.src = url;
-                              hf.href = url;
-                              hf.download = new Date().toISOString() + '.wav';
-                              hf.innerHTML = hf.download;
-                              li.appendChild(au);
-                              li.appendChild(hf);
-                              dom.query('.voice-text').appendChild(li);
-                            });
-                            recorder && recorder.clear();
-                        });
-                        voiceDialog.on('close', function () {
-                            recorder.stop();
-                            recorder.clear();
-                        });
-                        voiceDialog.show();
-                    }, function(e) {
-                        alert('发送了一些错误');
-                    });
-
-
-
+            // 处理h5
+            if (isSupportAudio()) {
+                if (!isInited) {
+                    voiceDialog = new VoiceDialog();
                     isInited = true;
-                    return;
                 }
-            }
 
-            if (isWechat()) {
-                voiceDialog.show();
-                return;
-            }
+                initBaiduVoice(voiceDialog, {
+                    oncomplete: opts.oncomplete
+                });
 
-            // if (isSupportAudio()) {
-            //     checkAudio(function () {
-            //         voiceDialog.show();
-            //     });
-            //     return;
-            // }
+                return {
+                    dispose: voiceDialog.dispose
+                };
+            }
         });
-    };
-
-    exports.dispose = function () {
-
     };
 
     return exports;

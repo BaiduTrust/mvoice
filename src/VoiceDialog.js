@@ -129,11 +129,18 @@ define(function (require) {
             var self = this;
 
             switch (status) {
+                // 开始说话
                 case 'speaking':
                     dom.addClass(self.speakBtn, 'press');
                     self._setVoiceText(SPEAKING_TXT);
                     break;
 
+                // 不断返回结果
+                case 'result':
+                    self._setVoiceText(speakWord);
+                    break;
+
+                // 产生结果，关闭语音浮层
                 case 'complete':
                     dom.removeClass(self.speakBtn, 'press');
                     self._setVoiceText(speakWord);
@@ -143,6 +150,21 @@ define(function (require) {
 
                             if (typeof callback === 'function') {
                                 callback(speakWord);
+                            }
+                        },
+                        500
+                    );
+                    break;
+
+                // 关闭语音浮层
+                case 'finish':
+                    dom.removeClass(self.speakBtn, 'press');
+                    setTimeout(
+                        function () {
+                            self.hide();
+
+                            if (typeof callback === 'function') {
+                                callback();
                             }
                         },
                         500
