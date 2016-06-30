@@ -201,14 +201,6 @@ define(function (require) {
             this.emit('hide', this);
         },
 
-        disable: function () {
-            // TODO
-        },
-
-        enable: function () {
-            // TODO
-        },
-
         /**
          * 销毁语音浮层
          *

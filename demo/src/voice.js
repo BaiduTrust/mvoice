@@ -35,12 +35,17 @@ define(function (require) {
     }
 
     function initVoice() {
-        mvoice.init({
+        var mv = mvoice.init({
             trigger: '#search-btn',
+            // 语音输入完成后的回调
             oncomplete: function (result) {
                 var input = dom.g('search-input');
                 input.value = result;
             }
+        });
+
+        dom.g('dispose').addEventListener('click', function () {
+            mv.dispose();
         });
     }
 

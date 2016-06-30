@@ -306,8 +306,7 @@ define(function (require) {
             return true;
         }
 
-        // UA检测和特性一起做检测
-        // 默认只对Android的Chrome开放
+        // XXX 默认只对Android的原生Chrome开放
         // - ios系统完全不支持语音
         // - Android只有Chrome和少数原生浏览器完美支持，其他浏览器可能支持语音特性，但是实际测试没法调起
         // 等到浏览器的支持度逐渐提升，将不再用UA检测
@@ -329,6 +328,7 @@ define(function (require) {
      * @param {Object} opts 参数
      * @param {string|HTMLElement=} opts.trigger 触发参数
      * @param {string} opts.oncomplete 完成后回调函数
+     * @return {Object} 返回的对象
      */
     exports.init = function (opts) {
         opts = opts || {};
@@ -341,12 +341,14 @@ define(function (require) {
         }
 
         var isInited = false;
-        var voiceDialog;
+        var voiceDialog = exports.isCompat() ? new VoiceDialog() : null;
 
         Tap.mixin(triggerElem);
 
-        triggerElem.addEventListener('click', function () {
+        // trigger的tap事件
+        function triggerHanlder() {
 
+            // 是否支持语音，包括微信&原生
             if (!exports.isCompat()) {
                 alert(ERR_MSG.IS_NOT_SUPPORT);
                 return;
@@ -355,7 +357,6 @@ define(function (require) {
             // 处理微信
             if (isWechat()) {
                 if (!isInited) {
-                    voiceDialog = new VoiceDialog();
                     initWxVoice(voiceDialog, {
                         oncomplete: opts.oncomplete
                     });
@@ -372,7 +373,6 @@ define(function (require) {
             // 处理h5
             if (isSupportAudio()) {
                 if (!isInited) {
-                    voiceDialog = new VoiceDialog();
                     isInited = true;
                 }
 
@@ -382,7 +382,16 @@ define(function (require) {
 
                 return;
             }
-        });
+        }
+
+        triggerElem.addEventListener('click', triggerHanlder);
+
+        return {
+            dispose: function () {
+                triggerElem.removeEventListener('click', triggerHanlder);
+                voiceDialog && voiceDialog.dispose();
+            }
+        };
     };
 
     return exports;
