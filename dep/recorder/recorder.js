@@ -7,7 +7,7 @@ define(function (require) {
 
     var isHttps = location.protocol === 'https:';
 
-    var WORKER_PATH = '/dep/baiduvoice/recorderWorker.js';
+    var WORKER_PATH = '/dep/recorder/recorderWorker.js';
 
     var URL_BAIDU_VOICE = isHttps
         ? 'https://sp3.baidu.com/6qUDsjip0QIZ8tyhnq/echo.fcgi'
