@@ -11,7 +11,7 @@ define(function (require) {
     var env = require('saber-env');
     var ajax = require('saber-ajax').ejson;
     var Tap = require('saber-tap');
-    var baiduvoice = require('baiduvoice');
+    var recorder = require('recorder');
     var VoiceDialog = require('./VoiceDialog');
 
     /**
@@ -210,7 +210,7 @@ define(function (require) {
     function initBaiduVoice(voiceDialog, opts) {
         opts = opts || {};
 
-        baiduvoice.init().then(
+        recorder.init().then(
             function (recorder) {
                 recorder.on('result', function (result) {
                     var resultTxt = result.content.item.join(', ');
@@ -276,7 +276,7 @@ define(function (require) {
      * @return {boolean} 是否支持原生语音
      */
     function isSupportAudio() {
-        if (baiduvoice.support()) {
+        if (recorder.support()) {
             return true;
         }
 
