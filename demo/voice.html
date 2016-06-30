@@ -19,7 +19,8 @@
         }
 
         .voice-btn {
-            width: 70px;
+            padding: 0 20px;
+            font-size: 14px;
             height: 32px;
             border: 1px solid #306eff;
             background-color: #306eff;
@@ -28,11 +29,27 @@
             -webkit-appearance: none;
             border-radius: 0;
         }
+
+        hr {
+            height: 0;
+            font-size: 0;
+            border: 0;
+            border-bottom: 1px solid #e3e3e3;
+        }
+
+        .yes {
+            color: green;
+        }
+
+        .no {
+            color: red;
+        }
     </style>
 </head>
 <body>
     <input type="text" id="search-input" class="voice-input">
     <input type="button" id="search-btn" value="点击说话" class="voice-btn">
+    <div id="info"></div>
     <script>
     require.config({
         baseUrl: './src',

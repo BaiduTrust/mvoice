@@ -162,30 +162,6 @@ define(function (require) {
     }
 
     /**
-     * 是否支持原生语音
-     *
-     * @inner
-     * @return {boolean} 是否支持原生语音
-     */
-    function isSupportAudio() {
-        if (baiduvoice.support()) {
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * 是否是微信
-     *
-     * @inner
-     * @return {boolean} 是否是微信
-     */
-    function isWechat() {
-        return env.browser.wechat;
-    }
-
-    /**
      * 初始化微信语音
      *
      * @public
@@ -294,12 +270,36 @@ define(function (require) {
     }
 
     /**
+     * 是否支持原生语音
+     *
+     * @inner
+     * @return {boolean} 是否支持原生语音
+     */
+    function isSupportAudio() {
+        if (baiduvoice.support()) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * 是否是微信
+     *
+     * @inner
+     * @return {boolean} 是否是微信
+     */
+    function isWechat() {
+        return env.browser.wechat;
+    }
+
+    /**
      * 兼容性监测
      *
      * @public
      * @return {boolean} 是否兼容语音
      */
-    exports.checkCompat = function () {
+    exports.isCompat = function () {
 
         // 检测是否是微信
         if (isWechat()) {
@@ -311,7 +311,11 @@ define(function (require) {
         // - ios系统完全不支持语音
         // - Android只有Chrome和少数原生浏览器完美支持，其他浏览器可能支持语音特性，但是实际测试没法调起
         // 等到浏览器的支持度逐渐提升，将不再用UA检测
-        if (env.os.android && env.browser.chrome && isSupportAudio()) {
+        if (env.os.android
+            && env.browser.chrome
+            && !/version\/([0-9\.]+)/i.test(navigator.userAgent)
+            && isSupportAudio()
+        ) {
             return true;
         }
 
@@ -343,7 +347,7 @@ define(function (require) {
 
         triggerElem.addEventListener('click', function () {
 
-            if (!exports.checkCompat()) {
+            if (!exports.isCompat()) {
                 alert(ERR_MSG.IS_NOT_SUPPORT);
                 return;
             }
