@@ -156,7 +156,7 @@ define(function (require) {
                     );
                     break;
 
-                // 关闭语音浮层
+                // 直接关闭语音浮层
                 case 'finish':
                     dom.removeClass(self.speakBtn, 'press');
                     setTimeout(

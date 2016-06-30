@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <title>百度口碑</title>
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no">
+    <link rel="stylesheet" href="/src/mvoice.css">
+    <script src="//s1.bdstatic.com/r/www/cache/ecom/esl/2-0-6/esl.js"></script>
+    <style>
+        .voice-input {
+            width: 150px;
+            height: 30px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+            padding: 0 5px;
+            -webkit-appearance: none;
+            vertical-align: middle;
+            border-radius: 0;
+        }
+
+        .voice-btn {
+            width: 70px;
+            height: 32px;
+            border: 1px solid #306eff;
+            background-color: #306eff;
+            vertical-align: middle;
+            color: #fff;
+            -webkit-appearance: none;
+            border-radius: 0;
+        }
+    </style>
+</head>
+<body>
+    <input type="text" id="search-input" class="voice-input">
+    <input type="button" id="search-btn" value="点击说话" class="voice-btn">
+    <script>
+    require.config({
+        baseUrl: './src',
+        paths: {},
+        packages: [
+            {
+                name: 'etpl',
+                location: '../../dep/etpl/3.0.0/src',
+                main: 'main'
+            },
+            {
+                name: 'wx',
+                location: 'http://res.wx.qq.com/open/js/',
+                main: 'jweixin-1.0.0'
+            },
+            {
+                name: 'saber-dom',
+                location: '../../dep/saber-dom/1.0.0/src',
+                main: 'main'
+            },
+            {
+                name: 'saber-ajax',
+                location: '../../dep/saber-ajax/2.1.0/src',
+                main: 'main'
+            },
+            {
+                name: 'saber-emitter',
+                location: '../../dep/saber-emitter/2.0.0/src',
+                main: 'emitter'
+            },
+            {
+                name: 'saber-lang',
+                location: '../../dep/saber-lang/2.0.1/src',
+                main: 'main'
+            },
+            {
+                name: 'saber-promise',
+                location: '../../dep/saber-promise/2.1.0/src',
+                main: 'promise'
+            },
+            {
+                name: 'saber-tap',
+                location: '../../dep/saber-tap/1.0.0/src',
+                main: 'tap'
+            },
+            {
+                name: 'saber-env',
+                location: '../../dep/saber-env/1.0.0/src',
+                main: 'main'
+            },
+            {
+                name: 'Recorder',
+                location: '../../dep/Recorderjs/dist',
+                main: 'recorder'
+            },
+            {
+                name: 'baiduvoice',
+                location: '../../dep/baiduvoice',
+                main: 'recorder'
+            }
+        ]
+    });
+    </script>
+
+    <script>
+    require(['voice'], function (main) {
+        main.init();
+    });
+    </script>
+</body>
+</html>

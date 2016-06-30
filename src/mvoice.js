@@ -22,6 +22,21 @@ define(function (require) {
      */
     var URL_GET_WX_PARAM = '/mock/getweixinconfigajax.php';
 
+    /**
+     * 错误信息
+     *
+     * @const
+     * @type {Object}
+     */
+    var ERR_MSG = {
+        // 浏览器不支持
+        IS_NOT_SUPPORT: '您的浏览器暂不支持语音哦~',
+        // 用户主动拒绝，或者该站点不是https
+        REFUSE_AUTH: '无法获取使用语音的权限哦~',
+        // 需要https
+        NEED_HTTPS: '由于安全性考虑，该功能只能在https站点下使用'
+    };
+
     var exports = {};
 
     // 微信语音本地id
@@ -107,12 +122,9 @@ define(function (require) {
         }
 
         function startRecordHandler(self) {
-            // TODO 需要判断当前是否是录音状态
-            // 如果是的话直接停止上一次录音状态，开始新的录音
-
             wx.startRecord({
                 cancel: function () {
-                    alert('用户拒绝授权录音');
+                    alert(ERR_MSG.REFUSE_AUTH);
                 }
             });
         }
@@ -143,7 +155,7 @@ define(function (require) {
         wx.onVoiceRecordEnd({
             complete: function (res) {
                 voiceLocalId = res.localId;
-                // alert('录音时间已超过一分钟');
+                // 录音时间已超过一分钟时自动停止
                 translateHandler(res.translateResult);
             }
         });
@@ -171,25 +183,6 @@ define(function (require) {
      */
     function isWechat() {
         return env.browser.wechat;
-    }
-
-    /**
-     * 兼容性监测
-     *
-     * @inner
-     * @return {boolean} 是否兼容语音
-     */
-    function checkCompat() {
-        // 检测是否是微信
-        if (isWechat()) {
-            return true;
-        }
-        // 监测是否支持WebRTC
-        if (isSupportAudio()) {
-            return true;
-        }
-
-        return false;
     }
 
     /**
@@ -243,7 +236,6 @@ define(function (require) {
 
         baiduvoice.init().then(
             function (recorder) {
-
                 recorder.on('result', function (result) {
                     var resultTxt = result.content.item.join(', ');
 
@@ -288,10 +280,43 @@ define(function (require) {
 
             },
             function () {
-                alert('无法获取麦克风~');
+                // 站点不支持https
+                if (location.protocol !== 'https:') {
+                    alert(ERR_MSG.NEED_HTTPS);
+                }
+                // 用户没有同意使用麦克风
+                else {
+                    alert(ERR_MSG.REFUSE_AUTH);
+                }
+
             }
         );
     }
+
+    /**
+     * 兼容性监测
+     *
+     * @public
+     * @return {boolean} 是否兼容语音
+     */
+    exports.checkCompat = function () {
+
+        // 检测是否是微信
+        if (isWechat()) {
+            return true;
+        }
+
+        // UA检测和特性一起做检测
+        // 默认只对Android的Chrome开放
+        // - ios系统完全不支持语音
+        // - Android只有Chrome和少数原生浏览器完美支持，其他浏览器可能支持语音特性，但是实际测试没法调起
+        // 等到浏览器的支持度逐渐提升，将不再用UA检测
+        if (env.os.android && env.browser.chrome && isSupportAudio()) {
+            return true;
+        }
+
+        return false;
+    };
 
     /**
      * 初始化
@@ -306,6 +331,11 @@ define(function (require) {
         var trigger = opts.trigger;
 
         var triggerElem = dom.query(trigger);
+
+        if (!triggerElem) {
+            return;
+        }
+
         var isInited = false;
         var voiceDialog;
 
@@ -313,8 +343,8 @@ define(function (require) {
 
         triggerElem.addEventListener('click', function () {
 
-            if (!checkCompat()) {
-                alert('您的浏览器暂不支持语音哦~');
+            if (!exports.checkCompat()) {
+                alert(ERR_MSG.IS_NOT_SUPPORT);
                 return;
             }
 
@@ -332,9 +362,7 @@ define(function (require) {
                     voiceDialog.show();
                 }
 
-                return {
-                    dispose: voiceDialog.dispose
-                };
+                return;
             }
 
             // 处理h5
@@ -348,9 +376,7 @@ define(function (require) {
                     oncomplete: opts.oncomplete
                 });
 
-                return {
-                    dispose: voiceDialog.dispose
-                };
+                return;
             }
         });
     };

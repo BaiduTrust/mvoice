@@ -10,7 +10,7 @@ define(function (require) {
     var WORKER_PATH = '/dep/baiduvoice/recorderWorker.js';
 
     var URL_BAIDU_VOICE = isHttps
-        ? 'https://sp3.baidu.com/6qUDsjip0QIZ8tyhnq'
+        ? 'https://sp3.baidu.com/6qUDsjip0QIZ8tyhnq/echo.fcgi'
         : 'http://vse.baidu.com/echo.fcgi';
 
     var userMedia;
