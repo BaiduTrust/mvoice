@@ -34,7 +34,11 @@ define(function (require) {
         // 用户主动拒绝，或者该站点不是https
         REFUSE_AUTH: '无法获取使用语音的权限哦~',
         // 需要https
-        NEED_HTTPS: '由于安全性考虑，该功能只能在https站点下使用'
+        NEED_HTTPS: '由于安全性考虑，该功能只能在https站点下使用',
+        // 微信语音配置错误
+        WX_VOICE_ERR: '语音配置发生了些错误，暂不可用，请稍后尝试~',
+        // 微信语音太短
+        WX_VOICE_TOO_SHORT: '语音过短，请重新尝试~'
     };
 
     var exports = {};
@@ -84,14 +88,19 @@ define(function (require) {
             .get(
                 URL_GET_WX_PARAM,
                 {
-                    url: encodeURIComponent(window.location.href)
+                    url: encodeURIComponent(window.location.href.split('#')[0])
                 }
             )
-            .then(function (data) {
-                if (typeof callback === 'function') {
-                    callback(data);
+            .then(
+                function (data) {
+                    if (typeof callback === 'function') {
+                        callback(data);
+                    }
+                },
+                function () {
+                    alert(ERR_MSG.WX_VOICE_ERR);
                 }
-            });
+            );
     }
 
     /**
@@ -122,9 +131,15 @@ define(function (require) {
         }
 
         function startRecordHandler(self) {
+            // 先停止再重新记录
+            wx.stopRecord();
             wx.startRecord({
                 cancel: function () {
                     alert(ERR_MSG.REFUSE_AUTH);
+                },
+                fail: function () {
+                    alert(ERR_MSG.WX_VOICE_ERR);
+                    voiceDialog.setVoiceStatus('finish');
                 }
             });
         }
@@ -143,6 +158,17 @@ define(function (require) {
                             translateHandler(res.translateResult);
                         }
                     });
+                },
+                fail: function (e) {
+
+                    if (/tooshort/.test(e.errMsg)) {
+                        alert(ERR_MSG.WX_VOICE_TOO_SHORT);
+                    }
+                    else {
+                        alert(ERR_MSG.WX_VOICE_ERR);
+                    }
+
+                    voiceDialog.setVoiceStatus('finish');
                 }
             });
         }
@@ -300,7 +326,7 @@ define(function (require) {
      * @return {boolean} 是否兼容语音
      */
     exports.isCompat = function () {
-
+        return true;
         // 检测是否是微信
         if (isWechat()) {
             return true;
@@ -321,78 +347,85 @@ define(function (require) {
         return false;
     };
 
+    var isInited = false;
+    var voiceDialog;
+
     /**
-     * 初始化
+     * 渲染语音输入(口碑定制)
      *
      * @public
      * @param {Object} opts 参数
-     * @param {string|HTMLElement=} opts.trigger 触发参数
-     * @param {string} opts.oncomplete 完成后回调函数
-     * @return {Object} 返回的对象
+     * @param {string|HTMLElement=} opts.trigger 触发元素
+     * @param {string|HTMLElement=} opts.input 输入元素
+     * @param {Function=} opts.oncomplete 完成后回调函数
+     * @return {VoiceDialog?}
      */
-    exports.init = function (opts) {
+    exports.render = function (opts) {
         opts = opts || {};
         var trigger = opts.trigger;
+        var input = opts.input;
 
-        var triggerElem = dom.query(trigger);
+        var triggerEle = dom.query(trigger);
+        var inputEle = dom.query(input);
 
-        if (!triggerElem) {
+        if (!triggerEle || !inputEle) {
             return;
         }
 
-        var isInited = false;
-        var voiceDialog = exports.isCompat() ? new VoiceDialog() : null;
+        var cb = opts.oncomplete || function () {};
 
-        Tap.mixin(triggerElem);
+        opts.oncomplete = function (ret) {
+            ret && (inputEle.value = inputEle.value + ret);
 
-        // trigger的tap事件
-        function triggerHanlder() {
+            cb.call(this, ret);
+        };
 
-            // 是否支持语音，包括微信&原生
-            if (!exports.isCompat()) {
-                alert(ERR_MSG.IS_NOT_SUPPORT);
-                return;
-            }
+        if (!voiceDialog) {
+            voiceDialog = exports.isCompat() ? new VoiceDialog() : null;
+            voiceDialog && voiceDialog.on('dispose', function () {
+                voiceDialog = null;
+                isInited = false;
+            });
+        }
 
-            // 处理微信
-            if (isWechat()) {
-                if (!isInited) {
-                    initWxVoice(voiceDialog, {
-                        oncomplete: opts.oncomplete
-                    });
+        var timer;
 
-                    isInited = true;
-                }
-                else {
-                    voiceDialog.show();
-                }
+        // 是否支持语音，包括微信&原生
+        if (!exports.isCompat()) {
+            alert(ERR_MSG.IS_NOT_SUPPORT);
+            return;
+        }
 
-                return;
-            }
-
-            // 处理h5
-            if (isSupportAudio()) {
-                if (!isInited) {
-                    isInited = true;
-                }
-
-                initBaiduVoice(voiceDialog, {
+        // 处理微信
+        if (isWechat()) {
+            if (!isInited) {
+                initWxVoice(voiceDialog, {
                     oncomplete: opts.oncomplete
                 });
 
-                return;
+                isInited = true;
             }
+            else {
+                voiceDialog.show();
+            }
+
+            return voiceDialog;
         }
 
-        triggerElem.addEventListener('click', triggerHanlder);
-
-        return {
-            dispose: function () {
-                triggerElem.removeEventListener('click', triggerHanlder);
-                voiceDialog && voiceDialog.dispose();
+        // 处理h5
+        if (isSupportAudio()) {
+            if (!isInited) {
+                isInited = true;
             }
-        };
+
+            initBaiduVoice(voiceDialog, {
+                oncomplete: opts.oncomplete
+            });
+
+            return voiceDialog;
+        }
     };
+
 
     return exports;
 });

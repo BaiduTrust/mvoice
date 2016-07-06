@@ -35,17 +35,21 @@ define(function (require) {
     }
 
     function initVoice() {
-        var mv = mvoice.init({
-            trigger: '#search-btn',
-            // 语音输入完成后的回调
-            oncomplete: function (result) {
-                var input = dom.g('search-input');
-                input.value = result;
-            }
+        var mvoiceDialog;
+        dom.g('search-btn').addEventListener('click', function (elem) {
+            mvoiceDialog = mvoice.render({
+                trigger: elem,
+                input: '#search-input',
+                // 语音输入完成后的回调
+                oncomplete: function (result) {
+                    console.log(result);
+                }
+            });
         });
 
         dom.g('dispose').addEventListener('click', function () {
-            mv.dispose();
+            mvoiceDialog && mvoiceDialog.dispose();
+            mvoiceDialog = null;
         });
     }
 
