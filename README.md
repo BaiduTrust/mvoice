@@ -1,6 +1,6 @@
 # mvoice
 
-<img src="https://raw.githubusercontent.com/baiduTrust/mvoice/master/tmp/screenshot_1.jpg" width="300">
+<img src="https://raw.githubusercontent.com/baiduTrust/mvoice/master/tmp/screenshot_1.png" width="300">
 
 ## 简介
 
