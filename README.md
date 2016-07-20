@@ -1,11 +1,30 @@
 # mvoice
 
+<img src="https://raw.githubusercontent.com/baiduTrust/mvoice/master/tmp/screenshot_1.jpg" width="300">
+
 ## 简介
 
 移动端语音组件（支持使用微信和原生两种方式）
 
 - 在微信客户端使用微信 JSSDK 的语音 api 实现
 - 对于正常浏览器（目前只有安卓的原生 Chrome 完全支持）使用 html5 原生方式
+
+## 使用方法
+
+```javascript
+// 创建并渲染组件
+mvoiceDialog = mvoice.render({
+    // 如果设置了input，则输入完成后将内容追加到input的value中
+    input: '#search-input',
+    // 语音输入完成后的回调
+    oncomplete: function (result) {
+        console.log(result);
+    }
+});
+
+// 销毁组件
+mvoiceDialog.dispose();
+```
 
 ## 线上demo
 

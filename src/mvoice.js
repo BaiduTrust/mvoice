@@ -45,6 +45,12 @@ define(function (require) {
     // 微信语音本地id
     var voiceLocalId;
 
+    // 组件是否初始化
+    var isInited = false;
+
+    // 组件实例
+    var voiceDialog;
+
     /**
      * 微信 api 配置
      *
@@ -346,35 +352,25 @@ define(function (require) {
         return false;
     };
 
-    var isInited = false;
-    var voiceDialog;
-
     /**
      * 渲染语音输入
      *
      * @public
      * @param {Object} opts 参数
-     * @param {string|HTMLElement=} opts.trigger 触发元素
      * @param {string|HTMLElement=} opts.input 输入元素
      * @param {Function=} opts.oncomplete 完成后回调函数
      * @return {VoiceDialog?}
      */
     exports.render = function (opts) {
         opts = opts || {};
-        var trigger = opts.trigger;
         var input = opts.input;
-
-        var triggerEle = dom.query(trigger);
         var inputEle = dom.query(input);
-
-        if (!triggerEle || !inputEle) {
-            return;
-        }
-
         var cb = opts.oncomplete || function () {};
 
         opts.oncomplete = function (ret) {
-            ret && (inputEle.value = inputEle.value + ret);
+            if (inputEle) {
+                ret && (inputEle.value = inputEle.value + ret);
+            }
 
             cb.call(this, ret);
         };

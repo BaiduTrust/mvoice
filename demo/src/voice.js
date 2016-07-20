@@ -36,9 +36,9 @@ define(function (require) {
 
     function initVoice() {
         var mvoiceDialog;
-        dom.g('search-btn').addEventListener('click', function (elem) {
+        dom.g('search-btn').addEventListener('click', function () {
             mvoiceDialog = mvoice.render({
-                trigger: elem,
+                // 如果设置了input，则输入完成后将内容追加到input的value中
                 input: '#search-input',
                 // 语音输入完成后的回调
                 oncomplete: function (result) {
