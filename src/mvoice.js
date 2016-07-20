@@ -10,7 +10,6 @@ define(function (require) {
     var dom = require('saber-dom');
     var env = require('saber-env');
     var ajax = require('saber-ajax').ejson;
-    var Tap = require('saber-tap');
     var recorder = require('recorder');
     var VoiceDialog = require('./VoiceDialog');
 
@@ -326,7 +325,7 @@ define(function (require) {
      * @return {boolean} 是否兼容语音
      */
     exports.isCompat = function () {
-        return true;
+
         // 检测是否是微信
         if (isWechat()) {
             return true;
@@ -351,7 +350,7 @@ define(function (require) {
     var voiceDialog;
 
     /**
-     * 渲染语音输入(口碑定制)
+     * 渲染语音输入
      *
      * @public
      * @param {Object} opts 参数
@@ -387,8 +386,6 @@ define(function (require) {
                 isInited = false;
             });
         }
-
-        var timer;
 
         // 是否支持语音，包括微信&原生
         if (!exports.isCompat()) {
