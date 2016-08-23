@@ -12,8 +12,11 @@
 ## 使用方法
 
 ```javascript
+
+var mvoice = require('mvoice');
+
 // 创建并渲染组件
-mvoiceDialog = mvoice.render({
+var mvoiceDialog = mvoice.render({
     // 如果设置了input，则输入完成后将内容追加到input的value中
     input: '#search-input',
     // 语音输入完成后的回调
