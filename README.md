@@ -1,13 +1,13 @@
 # mvoice
 
-<img src="https://raw.githubusercontent.com/baiduTrust/mvoice/master/tmp/screenshot_1.png" width="300">
-
 ## 简介
 
 移动端语音组件（支持使用微信和原生两种方式）
 
 - 在微信客户端使用微信 JSSDK 的语音 api 实现
 - 对于正常浏览器（目前只有安卓的原生 Chrome 完全支持）使用 html5 原生方式
+
+<img src="tmp/screenshot_1.png" width="300">
 
 ## 使用方法
 
